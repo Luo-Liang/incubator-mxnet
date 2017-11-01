@@ -159,10 +159,10 @@ class KVStoreLocal : public KVStore {
     for (size_t i = 0; i < uniq_keys.size(); ++i) {
       int key = uniq_keys[i];
       const NDArray& merged = comm_->Reduce(key, grouped_vals[i], priority);
-      if(keys[0] == 0)
+      /*if(keys[0] == 0)
       {
 	  printf("grouped_vals[i][0] = %s\n", grouped_vals[i][0].Summarize().c_str());
-      }
+	  }*/
       
       NDArray& local = local_[key];
       if (updater_ != nullptr) {

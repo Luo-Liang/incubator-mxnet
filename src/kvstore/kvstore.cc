@@ -39,7 +39,7 @@ KVStore* KVStore::Create(const char *type_name) {
   auto has = [tname](const std::string& pattern) {
     return tname.find(pattern) != std::string::npos;
   };
-  if (has("device")) {
+  if (has("device") && has("dist") == false) {
     use_device_comm = true;
   }
 

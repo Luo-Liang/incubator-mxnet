@@ -398,6 +398,7 @@ class KVStoreDistServer {
     }
   }
 
+  int cntr = 0;
   void DataHandleDefault(const ps::KVMeta& req_meta,
                          const ps::KVPairs<real_t> &req_data,
                          ps::KVServer<real_t>* server) {
@@ -412,9 +413,10 @@ class KVStoreDistServer {
     int key = DecodeKey(req_data.keys[0]);
     auto& stored = store_[key];
     
-    if(key == 0)
+    if(key == 0 && req_meta.push)
     {
-	printf("key 0 before is %s\n", stored.Summarize().c_str());
+	cntr++;
+	printf("[%d][0]key 0 before is %s\n", cntr, stored.Summarize().c_str());
     }
     // there used several WaitToRead, this is because \a recved's memory
     // could be deallocated when this function returns. so we need to make sure
@@ -428,7 +430,7 @@ class KVStoreDistServer {
 	NDArray recved = NDArray(recv_blob, 0);
 	if(key == 0)
 	{
-	    printf("update vector is %s\n", recved.Summarize().c_str());
+	    printf("[%d][1]update vector is %s\n", cntr, recved.Summarize().c_str());
 	}
 	if (stored.is_none())
 	{
@@ -460,8 +462,8 @@ class KVStoreDistServer {
 	    ApplyUpdates(key, &merged, &stored, server);
 	    if(key == 0)
 	    {
-		printf("end of update merge %s\n", merged.array.Summarize().c_str());
-		printf("end of update stored %s\n", stored.Summarize().c_str());
+		printf("[%d][2]end of update merge %s\n", cntr, merged.array.Summarize().c_str());
+		printf("[%d][3]end of update stored %s\n", cntr, stored.Summarize().c_str());
 	    }
 	} 
 	else
