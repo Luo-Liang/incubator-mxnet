@@ -669,6 +669,7 @@ class KVStoreDist : public KVStoreLocal {
 //	  printf("worker side. vals[0] = %s, vals_cnt = %d\n", vals[0].Summarize().c_str(), vals.size());
 //	  printf("worker side. send_buf = %s\n", send_buf.Summarize().c_str());
       //    }
+
       //now, each key has only one corresponding merge buffer.
       // push to servers
       size_t size = send_buf.shape().Size();
