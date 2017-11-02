@@ -462,6 +462,7 @@ class BaseModule(object):
             self.install_monitor(monitor)
         self.init_params(initializer=initializer, arg_params=arg_params, aux_params=aux_params,
                          allow_missing=allow_missing, force_init=force_init)
+        print("Selected Optimizer = " + str(optimizer));
         self.init_optimizer(kvstore=kvstore, optimizer=optimizer,
                             optimizer_params=optimizer_params)
 
@@ -955,7 +956,7 @@ class BaseModule(object):
         """
         raise NotImplementedError()
 
-    def init_optimizer(self, kvstore='local', optimizer='sgd',
+    def init_optimizer(self, kvstore='local', optimizer='nag',
                        optimizer_params=(('learning_rate', 0.01),), force_init=False):
         """Installs and initializes optimizers, as well as initialize kvstore for
            distributed training

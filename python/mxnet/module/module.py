@@ -457,7 +457,7 @@ class Module(BaseModule):
 
         self._exec_group.reshape(self._data_shapes, self._label_shapes)
 
-    def init_optimizer(self, kvstore='local', optimizer='sgd',
+    def init_optimizer(self, kvstore='local', optimizer='nag',
                        optimizer_params=(('learning_rate', 0.01),), force_init=False):
         """Installs and initializes optimizers.
 
@@ -505,6 +505,7 @@ class Module(BaseModule):
             optimizer = opt.create(optimizer,
                                    sym=self.symbol, param_idx2name=idx2name,
                                    **optimizer_params)
+            print("optimizer " + str(optimizer) + " selected.")
         else:
             assert isinstance(optimizer, opt.Optimizer)
             if optimizer.rescale_grad != rescale_grad:

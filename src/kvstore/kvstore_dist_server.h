@@ -124,6 +124,10 @@ class KVStoreDistServer {
     {
 	SuppressAggregator = true;
     }
+    else
+    {
+	SuppressAggregator = false;
+    }
     LOG(INFO)<<"PHUB SUPPRESS AGGREGATOR toggled?" << suppress;
   }
 
@@ -414,11 +418,11 @@ class KVStoreDistServer {
     auto& stored = store_[key];
     
 
-   // if(key == 0 && req_meta.push)
-   // {
-	//cntr++;
-	//printf("[%d][0]key 0 before is %s\n", cntr, stored.Summarize().c_str());
-  //  }
+    //if(key == 0 && req_meta.push)
+    //{
+    //cntr++;
+//	printf("[%d][0]key 0 before is %s\n", cntr, stored.Summarize().c_str());
+    //  }
 
     // there used several WaitToRead, this is because \a recved's memory
     // could be deallocated when this function returns. so we need to make sure
@@ -433,7 +437,7 @@ class KVStoreDistServer {
 
 	//if(key == 0)
 	//{
-	//    printf("[%d][1]update vector is %s\n", cntr, recved.Summarize().c_str());
+	//   printf("[%d][1][aggregator_suppressed=%d]update vector is %s\n", cntr, SuppressAggregator, recved.Summarize().c_str());
 	//}
 	if (stored.is_none())
 	{
@@ -442,6 +446,11 @@ class KVStoreDistServer {
 	  CopyFromTo(recved, &stored, 0);
 	  server->Response(req_meta);
 	  stored.WaitToRead();
+	  //if(key == 0)
+	  //{
+	  //    printf("[%d][1.1]initialization done: %s\n", cntr, stored.Summarize().c_str());
+	  //}
+
 	} 
 	else if (sync_mode_) 
 	{
@@ -455,12 +464,18 @@ class KVStoreDistServer {
 	    {
 		if (merged.request.size() == 0) 
 		{
+		    //printf("[%d][1.2] using copy strategy\n", cntr);
 		    CopyFromTo(recved, &merged.array, 0);
 		} else
 		{
+		    //printf("[%d][1.5] using add strategy\n", cntr);
 		    merged.array += recved;
 		}
 	    }
+	    //if(key == 0)
+	    //{
+	    //printf("[%d][2] merge req size = %d\n, merge value = %s\n", cntr, merged.request.size(), merged.array.Summarize().c_str());
+	    //}
 	    merged.request.push_back(req_meta);
 	    ApplyUpdates(key, &merged, &stored, server);
 	    // if(key == 0)
@@ -469,11 +484,11 @@ class KVStoreDistServer {
 //		printf("end of update stored %s\n", stored.Summarize().c_str());
 //	    }
 
-	   // if(key == 0)
-	   // {
-		//printf("[%d][2]end of update merge %s\n", cntr, merged.array.Summarize().c_str());
-		//printf("[%d][3]end of update stored %s\n", cntr, stored.Summarize().c_str());
-	   // }
+	    //if(key == 0)
+	    //{
+//		printf("[%d][3]end of update merge %s\n", cntr, merged.array.Summarize().c_str());
+	    //printf("[%d][4]end of update stored %s\n", cntr, stored.Summarize().c_str());
+	    //}
 	} 
 	else
 	{
@@ -484,7 +499,7 @@ class KVStoreDistServer {
 		});
 	    server->Response(req_meta);
 	    stored.WaitToRead();
-      }
+	}
     } 
     else
     {

@@ -494,7 +494,7 @@ class FeedForward(BASE_ESTIMATOR):
         The additional keyword arguments passed to optimizer.
     """
     def __init__(self, symbol, ctx=None,
-                 num_epoch=None, epoch_size=None, optimizer='sgd',
+                 num_epoch=None, epoch_size=None, optimizer='nag',
                  initializer=Uniform(0.01),
                  numpy_batch_size=128,
                  arg_params=None, aux_params=None,
@@ -953,7 +953,7 @@ class FeedForward(BASE_ESTIMATOR):
 
     @staticmethod
     def create(symbol, X, y=None, ctx=None,
-               num_epoch=None, epoch_size=None, optimizer='sgd', initializer=Uniform(0.01),
+               num_epoch=None, epoch_size=None, optimizer='nag', initializer=Uniform(0.01),
                eval_data=None, eval_metric='acc',
                epoch_end_callback=None, batch_end_callback=None,
                kvstore='local', logger=None, work_load_list=None,

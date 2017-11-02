@@ -260,7 +260,7 @@ class KVStoreDist : public KVStoreLocal {
 	    comm_->Init(keys[i], values[i].storage_type(), values[i].shape(), values[i].dtype());
 	}
 	if (get_rank() == 0) {
-	    printf("Worker 0 is pushing key %d\n", keys[0]);
+	    //printf("Worker 0 is pushing key %d\n", keys[0]);
 	    Push_(keys, values, 0, false);
 	    // wait until the push is finished
 	    for (const auto& v : values) {
@@ -270,7 +270,7 @@ class KVStoreDist : public KVStoreLocal {
 	    for (const int key : keys) {
 		comm_buf_[key].WaitToWrite();
 	    }
-	    printf("Worker 0 has finished pushing key %d\n", keys[0]);	    
+	    //printf("Worker 0 has finished pushing key %d\n", keys[0]);	    
 	} else {
 	    // do nothing
 	}
@@ -712,6 +712,8 @@ class KVStoreDist : public KVStoreLocal {
 	      CHECK(PhysicalKeyPullAddress.at(key).size() != 0);
 	      //queue another broadcast. this won't happen until push is done, and by which time 
 	      //with pull request elision enabled vans send_buf will be populated.
+	      //printf("pushing physical key %d\n from PHUB", keys[0]);
+
 	      comm_->Broadcast(key, send_buf, PhysicalKeyPullAddress.at(key), priority);
 	  }
 	  else
@@ -725,6 +727,7 @@ class KVStoreDist : public KVStoreLocal {
 		  priority,
 		  PROFILER_MESSAGE("KVStoreDistDefaultPush"));
 	      //PUll elision disabled means it can be shared for read.
+	      //printf("pushing physical key %d\n with elision off from phub\n", keys[0]);
 	  }
       }
       else if (storage_type == kRowSparseStorage) 

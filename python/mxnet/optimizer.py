@@ -511,12 +511,13 @@ class SGD(Optimizer):
         return momentum
 
     def _update_impl(self, index, weight, grad, state, multi_precision=False):
+        #raise
         assert(isinstance(weight, NDArray))
         assert(isinstance(grad, NDArray))
         self._update_count(index)
         lr = self._get_lr(index)
         wd = self._get_wd(index)
-
+        #print("my identity is " + str(self));
         kwargs = {'rescale_grad': self.rescale_grad}
         if self.momentum > 0:
             kwargs['momentum'] = self.momentum
@@ -539,9 +540,11 @@ class SGD(Optimizer):
                               lr=lr, wd=wd, **kwargs)
 
     def update(self, index, weight, grad, state):
+        #print("why im i calling into my update???")
         self._update_impl(index, weight, grad, state, multi_precision=False)
 
     def update_multi_precision(self, index, weight, grad, state):
+        
         use_multi_precision = self.multi_precision and weight.dtype == numpy.float16
         self._update_impl(index, weight, grad, state,
                           multi_precision=use_multi_precision)
@@ -616,7 +619,8 @@ class NAG(SGD):
     """
     def __init__(self, **kwargs):
         super(NAG, self).__init__(**kwargs)
-
+        #raise
+        
     def update(self, index, weight, grad, state):
         assert(isinstance(weight, NDArray))
         assert(isinstance(grad, NDArray))
@@ -624,6 +628,7 @@ class NAG(SGD):
         #print "warning error note info phubvk2pk= ", str(self.PHUBVK2PK)
         if index in self.PHUBVK2PK:
             index = self.PHUBVK2PK[index]
+            #print("redirecting " + str(index) + " to " + self.PHUBVK2PK[index]);
 
         self._update_count(index)
         lr = self._get_lr(index)
@@ -643,6 +648,14 @@ class NAG(SGD):
         else:
             assert self.momentum == 0.0
             weight[:] += -lr * (grad + wd * weight)
+            
+    def update_multi_precision(self, index, weight, grad, state):
+
+        #print("instance of weight is " + str(weight))
+        #print("instance of grad is " + str(grad))
+        # self.optimizer.update_multi_precision(index, weight, grad, self.states[index])
+        self.update(index,weight,grad,state)
+
 
 @register
 class SGLD(Optimizer):
@@ -1167,6 +1180,7 @@ class Updater(object):
             self.states[index] = \
                 self.sync_state_context(self.states[index], weight.context)
             self.states_synced[index] = True
+        #print("type of weight = " + type(weight).__name__)
         self.optimizer.update_multi_precision(index, weight, grad, self.states[index])
 
     def sync_state_context(self, state, context):

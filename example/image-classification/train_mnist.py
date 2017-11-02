@@ -83,7 +83,8 @@ if __name__ == '__main__':
         disp_batches   = 100,
         num_epochs     = 20,
         lr             = .05,
-        lr_step_epochs = '10'
+        lr_step_epochs = '10',
+        optimizer      = 'nag'
     )
     args = parser.parse_args()
 
@@ -93,4 +94,4 @@ if __name__ == '__main__':
     sym = net.get_symbol(**vars(args))
 
     # train
-    fit.fit(args, sym, get_mnist_iter)
+    fit.fit(args, sym, get_mnist_iter, optimizer=args.optimizer)
