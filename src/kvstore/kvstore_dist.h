@@ -323,7 +323,7 @@ class KVStoreDist : public KVStoreLocal {
 
 		//in fact, should wait on 
 		//printf("rank 0 init %d ready\n", keys[0]);
-		LOG(INFO)<<"worker 0 setting up "<<keys.size()<<" keys";
+		//LOG(INFO)<<"worker 0 setting up "<<keys.size()<<" keys";
 	    }
 	    else {
 		// do nothing

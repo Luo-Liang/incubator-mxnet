@@ -145,7 +145,7 @@ def _initialize_kvstore(kvstore, param_arrays, arg_params, param_names, update_o
     #for now, comm_buf is used as send buffer, and we need to communicate address of pull buffers
     #we also communicate the size implicitly
     #-2 signals onkeypopulated.
-    # print "[info] total model size per worker  = %s. total number of params = %s" % (str(totalSize), len(arg_params))
+    print("[info] total model size per worker  = %s. total number of params = %s" % (str(totalSize), len(arg_params)))
     kvstore.initPHUB(-2, flattened)
 
 def _update_params_on_kvstore(param_arrays, grad_arrays, kvstore, param_names):
