@@ -45,7 +45,9 @@ if __name__ == '__main__':
         # train
         num_epochs       = 80,
         lr_step_epochs   = '30,60',
-        dtype            = 'float32'
+        dtype            = 'float32',
+        optimizer        = 'sgd',
+        frequent         = 100
     )
     args = parser.parse_args()
 
