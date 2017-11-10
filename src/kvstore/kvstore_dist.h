@@ -663,6 +663,7 @@ class KVStoreDist : public KVStoreLocal {
         }
         //CopyFromTo(merged, &send_buf);
       }
+      //simulate GPU-Direct
       CopyFromTo(merged, &send_buf);
       //if(key == 0)
       //{
@@ -713,7 +714,7 @@ class KVStoreDist : public KVStoreLocal {
 	      //queue another broadcast. this won't happen until push is done, and by which time 
 	      //with pull request elision enabled vans send_buf will be populated.
 	      //printf("pushing physical key %d\n from PHUB", keys[0]);
-
+	      //Simulate GPU-Direct
 	      comm_->Broadcast(key, send_buf, PhysicalKeyPullAddress.at(key), priority);
 	  }
 	  else

@@ -22,6 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 from common import find_mxnet, data, fit
 from common.util import download_file
 import mxnet as mx
+from mxnet import profiler
 
 if __name__ == '__main__':
     # parse args
@@ -57,4 +58,9 @@ if __name__ == '__main__':
     sym = net.get_symbol(**vars(args))
 
     # train
+    profiler.profiler_set_config('all')
+    #profiler.start()
+    profiler.profiler_set_state('run')
+
     fit.fit(args, sym, data.get_rec_iter)
+    profiler.profiler_set_state('stop')
