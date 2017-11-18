@@ -32,6 +32,7 @@
 #include <vector>
 #include <string>
 #include <limits>
+#include "../mshadow_op.h"
 #include "../elemwise_op_common.h"
 #include "../mxnet_op.h"
 #include "../mshadow_op.h"
@@ -225,7 +226,7 @@ void Fill(mshadow::Stream<xpu> *s, const TBlob& b, const OpReqType req, ValueTyp
       // Optimize common use-case of filling with ones
       MSHADOW_TYPE_SWITCH(b.type_flag_, DType, {
         MXNET_ASSIGN_REQ_SWITCH(req, Req, {
-          mxnet_op::Kernel<mxnet_op::op_with_req<mxnet_op::set_to_int<1>, Req>, xpu>::Launch(
+          mxnet_op::Kernel<mxnet_op::op_with_req<mxnet_op::set_one, Req>, xpu>::Launch(
             s, b.Size(), b.dptr<DType>());
         });
       });
@@ -378,9 +379,17 @@ void RangeCompute(const nnvm::NodeAttrs& attrs,
   Stream<xpu> *s = ctx.get_stream<xpu>();
   const RangeParam& param = nnvm::get<RangeParam>(attrs.parsed);
   MSHADOW_TYPE_SWITCH(outputs[0].type_flag_, DType, {
-    Kernel<range_fwd, xpu>::Launch(s, outputs[0].Size(),
-        static_cast<int>(param.repeat), static_cast<DType>(param.start),
-        static_cast<DType>(param.step), req[0], outputs[0].dptr<DType>());
+      // Force unsigned params to take two's complement form on ARM to ensure consistency with x86
+      // results.  Casting negative floats to unsigned types is undefined in the CPP standard.
+      auto step = std::is_signed<DType>() ? param.step : static_cast<int>(param.step);
+      auto start = std::is_signed<DType>() ? param.start : static_cast<int>(param.start);
+      Kernel<range_fwd, xpu>::Launch(s,
+                                     outputs[0].Size(),
+                                     static_cast<int>(param.repeat),
+                                     static_cast<DType>(start),
+                                     static_cast<DType>(step),
+                                     req[0],
+                                     outputs[0].dptr<DType>());
   });
 }
 
