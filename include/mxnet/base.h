@@ -255,6 +255,8 @@ struct RunContext {
   inline const Context& get_ctx() const {
     return ctx;
   }
+    std::string oprName;
+
 };
 }  // namespace mxnet
 

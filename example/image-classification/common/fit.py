@@ -165,7 +165,7 @@ def fit(args, network, data_loader, **kwargs):
             'learning_rate': lr,
             'wd' : args.wd,
             'lr_scheduler': lr_scheduler,
-            'multi_precision': True}
+            'multi_precision': False}
 
     # Only a limited number of optimizers have 'momentum' property
     has_momentum = {'sgd', 'dcasgd', 'nag'}
