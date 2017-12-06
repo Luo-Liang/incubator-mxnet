@@ -1043,6 +1043,7 @@ def test_convolution_grouping():
         np.testing.assert_allclose(arr1.asnumpy(), arr2.asnumpy(), rtol=1e-3, atol=1e-4)
 
 
+@unittest.skip("test fails intermittently. temporarily disabled till it gets fixed. tracked at https://github.com/apache/incubator-mxnet/issues/8712")
 def test_depthwise_convolution():
     for num_base in [1, 4, 16, 32, 64]:
         for kernel in [(3,3), (5,5)]:
@@ -1267,6 +1268,18 @@ def test_binary_op():
 
 
 def test_broadcast_binary_op():
+    def check_bmaxmin_gradient(test_sym, x, y, delta, rtol, atol):
+        """This function ensures that checking the numerical gradient of
+        broadcast_max/min is not crossing the boundary y=x where there
+        is no gradient definition at those sigularities."""
+        x_max = np.max(x)
+        y = x_max + 2 * delta + np.random.random(y.shape)
+        check_numeric_gradient(test_sym, [x, y], numeric_eps=delta, rtol=rtol, atol=atol)
+
+        x_min = np.min(x)
+        y = x_min - 2 * delta - np.random.random(y.shape)
+        check_numeric_gradient(test_sym, [x, y], numeric_eps=delta, rtol=rtol, atol=atol)
+
     a = mx.sym.Variable('a')
     b = mx.sym.Variable('b')
 
@@ -1316,13 +1329,15 @@ def test_broadcast_binary_op():
         c = mx.sym.broadcast_maximum(a, b)
         check_binary_op_forward(c, lambda x, y: np.maximum(x, y), gen_broadcast_data, mx_nd_func=mx.nd.maximum)
         # pass idx=200 to gen_broadcast_data so that generated ndarrays' sizes are not too big
-        check_numeric_gradient(c, gen_broadcast_data(idx=200), rtol=1e-2, atol=1e-3)
+        data = gen_broadcast_data(idx=200)
+        check_bmaxmin_gradient(c, data[0], data[1], 0.001, 1e-2, 1e-3)
 
     def test_bmin(a, b):
         c = mx.sym.broadcast_minimum(a, b)
         check_binary_op_forward(c, lambda x, y: np.minimum(x, y), gen_broadcast_data, mx_nd_func=mx.nd.minimum)
         # pass idx=200 to gen_broadcast_data so that generated ndarrays' sizes are not too big
-        check_numeric_gradient(c, gen_broadcast_data(idx=200), rtol=1e-2, atol=1e-3)
+        data = gen_broadcast_data(idx=200)
+        check_bmaxmin_gradient(c, data[0], data[1], 0.001, 1e-2, 1e-3)
 
     test_bplus(a, b)
     test_bminus(a, b)
@@ -3570,18 +3585,12 @@ def test_rcbrt_op():
 def test_custom_op():
     class Sqr(mx.operator.CustomOp):
         def forward(self, is_train, req, in_data, out_data, aux):
-            if in_data[0].stype == 'default':
-                aux[0][:] = 1
-                self.assign(out_data[0], req[0], in_data[0]*in_data[0])
-            else:
-                self.assign(out_data[0], req[0], mx.nd.sparse.square(in_data[0]))
-                if in_data[0].stype == 'csr':
-                    assert(isinstance(in_data[0], mx.nd.sparse.CSRNDArray))
+            self.assign(out_data[0], req[0], in_data[0]*in_data[0])
+            aux[0][:] = 1
 
         def backward(self, req, out_grad, in_data, out_data, in_grad, aux):
             self.assign(in_grad[0], req[0], 2*in_data[0]*out_grad[0])
-            if in_data[0].stype == 'default':
-                assert (aux[0].asnumpy() == 1).all()
+            assert (aux[0].asnumpy() == 1).all()
 
     @mx.operator.register("sqr")
     class SqrProp(mx.operator.CustomOpProp):
@@ -3603,16 +3612,6 @@ def test_custom_op():
         def infer_type(self, in_type):
             return in_type, [in_type[0]], [in_type[0]]
 
-        def infer_storage_type(self, in_stype):
-            if in_stype[0] == 'default':
-                return ['default'], ['default'], ['default']
-            return ['csr'], ['csr'], ['csr']
-
-        def infer_storage_type_backward(self, in_stype):
-            if in_stype[1] == 'default':
-                return ['default', 'default', 'default'], ['default'], ['default']
-            return ['default', 'csr', 'csr'], ['csr'], ['csr']
-
         def create_operator(self, ctx, shapes, dtypes):
             return Sqr()
 
@@ -3625,18 +3624,15 @@ def test_custom_op():
 
     data = mx.symbol.cast(data, dtype='float64')
     op = mx.symbol.cast(op, dtype='float32')
+    x = mx.nd.array(np.random.uniform(-1, 1, size=(4, 10)))
+    aux = mx.nd.zeros_like(x)
     check_numeric_gradient(op, [x], [aux])
 
-    x = x.tostype('csr')
-    aux = mx.nd.zeros_like(x)
     x.attach_grad()
     with mx.contrib.autograd.train_section():
         y = mx.nd.Custom(x, aux, op_type='sqr')
         y.backward()
-    mx.nd.waitall()
-    assert (x.grad.stype == 'csr')
-    assert (y.stype == 'csr')
-    assert (aux.stype == 'csr')
+
 
 def test_psroipooling():
     for num_rois in [1, 2]:

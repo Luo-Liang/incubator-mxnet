@@ -21,7 +21,7 @@
 import time
 import logging
 import warnings
-
+import os
 from .. import metric
 from .. import ndarray
 
@@ -486,7 +486,11 @@ class BaseModule(object):
                 if monitor is not None:
                     monitor.tic()
                 self.forward_backward(data_batch)
-                self.update()
+                NOUPDATE = os.environ.get('MXNET_DISABLE_UPDATE')
+                if NOUPDATE==None:
+                    self.update()
+                elif nbatch == 0:
+                    print("warning: Optimization is completely off.")
                 try:
                     # pre fetch next batch
                     next_data_batch = next(data_iter)
