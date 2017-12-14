@@ -15,7 +15,7 @@ verbose=$PS_VERBOSE
 #export DMLC_TRACKER_TOTAL_ID = 0
 export DMLC_PS_ROOT_PORT=9091; 
 export DMLC_NUM_WORKER=1;
-export DMLC_NUM_SERVER=1;
+export DMLC_NUM_SERVER=2;
 export DMLC_PS_ROOT_URI=127.0.0.1;
 export DMLC_ROLE=scheduler;  
 python train_mnist.py &
@@ -41,11 +41,11 @@ export DMLC_ROLE=worker; export DMLC_WORKER_ID=0
 
 
 export DMLC_TRACKER_TOTAL_ID=2
-export PS_VERBOSE=2
+export PS_VERBOSE=0
 export DMLC_ROLE=worker; export DMLC_WORKER_ID=1
 #valgrind  python train_mnist.py --kv-store dist_sync_device  --num-epochs 1 &
-gdb --args python train_mnist.py --kv-store dist_sync  --num-epochs 1 
-#python train_mnist.py --kv-store dist_sync_device --num-epochs 1 --gpus 0 &
+#gdb --args python train_mnist.py --kv-store dist_sync  --num-epochs 1 
+python train_mnist.py --kv-store dist_sync --num-epochs 1  &
 #python train_mnist.py --kv-store dist_sync_device --num-epochs 1  --gpus 0 &
 
 
@@ -55,5 +55,5 @@ export DMLC_TRACKER_TOTAL_ID=3
 export PS_VERBOSE=0
 export DMLC_ROLE=server; export DMLC_SERVER_ID=1
 #gdb --args python train_mnist.py --kv-store dist_sync_device 
-#python train_mnist.py --kv-store dist_sync_device --gpus 0 &
+python train_mnist.py --kv-store dist_sync  &
 #valgrind --error-limit=no python train_mnist.py --kv-store dist_sync_device &

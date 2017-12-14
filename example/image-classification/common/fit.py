@@ -103,6 +103,7 @@ def add_fit_args(parser):
                        help='1 means test reading speed without training')
     train.add_argument('--dtype', type=str, default='float32',
                        help='precision: float32 or float16')
+    train.add_argument('--profiler', action='store_true')
     return train
 
 def fit(args, network, data_loader, **kwargs):

@@ -103,7 +103,7 @@ endif
 USE_LAPACK = 1
 
 # path to lapack library in case of a non-standard installation
-USE_LAPACK_PATH =
+USE_LAPACK_PATH = /usr/include/lapacke
 
 # add path to intel library, you may need it for MKL, if you did not add the path
 # to environment variable

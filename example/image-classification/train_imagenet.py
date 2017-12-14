@@ -56,11 +56,18 @@ if __name__ == '__main__':
     from importlib import import_module
     net = import_module('symbols.'+args.network)
     sym = net.get_symbol(**vars(args))
+    
 
-    # train
-    profiler.profiler_set_config('all')
-    #profiler.start()
-    profiler.profiler_set_state('run')
+    if args.profiler:
+        fName = 'profile0.json'
+        if 'DMLC_WORKER_ID' in os.environ:
+            fName = 'profiler' + os.environ['DMLC_WORKER_ID'] + '.json'
+    
+        # train
+        profiler.profiler_set_config('all', fName)
+        #profiler.start()
+        profiler.profiler_set_state('run')
 
     fit.fit(args, sym, data.get_rec_iter)
-    profiler.profiler_set_state('stop')
+    if args.profiler:
+        profiler.profiler_set_state('stop')
