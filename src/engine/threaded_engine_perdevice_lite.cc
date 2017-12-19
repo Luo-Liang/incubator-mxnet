@@ -12,6 +12,7 @@
 #include "./thread_pool.h"
 #include "../common/lazy_alloc_array.h"
 #include "../common/utils.h"
+using namespace std;
 namespace mxnet {
 namespace engine {
 /*!
@@ -56,7 +57,11 @@ class ThreadedEnginePerDeviceLite : public ThreadedEngine {
   void PushToExecute(OprBlock *opr_block, bool pusher_thread) override {
     RunContext run_ctx;
     const Context& ctx = opr_block->ctx;
+    //std::cout<<"determining FLAGs..."<<std::endl;
      #if MXNET_USE_PROFILER
+    //LOG(INFO) << " profiling = " << opr_block->profiling <<" name = " <<opr_block->opr->opr_name; 
+
+    //std::cout<<"currently looking at " << opr_block->opr->opr_name << std::endl;
         if (opr_block->profiling && 
             opr_block->opr->opr_name && 
             strcmp(opr_block->opr->opr_name,"argmax_channel") &&
@@ -70,6 +75,7 @@ class ThreadedEnginePerDeviceLite : public ThreadedEngine {
       //  sizeof(opr_block->opr_stat->opr_name) - 1);
       // record operator start timestamp
       //SetOprStart(opr_block->opr_stat);
+	    //std::cout<<"skipping " << opr_block->opr->opr_name << std::endl;
               run_ctx.oprName.assign(opr_block->opr->opr_name);
               opr_block->opr->fn = emptyFunc2;
          } 
